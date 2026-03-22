@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - AI Smart Tutor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Mobile Menu Toggle -->
+  <div class="mobile-menu-toggle">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </div>
+
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay"></div>
+
+  <!-- Enterprise Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <h2>
+      <span>📚</span>
+      <span>AI Smart Tutor</span>
+    </h2>
+    <ul>
+      <li><a href="dashboard.html" class="active"><span>Dashboard</span></a></li>
+      <li><a href="leaderboard.html"><span>Leaderboard</span></a></li>
+      <li><a href="upload.html"><span>Upload Textbook</span></a></li>
+      <li><a href="#" onclick="logout()" class="logout-btn"><span>Logout</span></a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main page-container">
+    <!-- Page Header -->
+    <div class="page-header content-section">
+      <div class="page-title-section">
+        <h1>Welcome, <span id="username">Student</span>!</h1>
+        <p class="page-subtitle">Ready to accelerate your learning journey with AI-powered insights?</p>
+      </div>
+      <div class="user-info">
+        <div class="avatar" id="avatar">S</div>
+        <div class="user-details">
+          <div class="user-name" id="display-username">Student</div>
+          <div class="user-grade">Class <span id="grade">10</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Grid -->
+    <div class="content-section">
+      <div class="cards stagger-children">
+        <div class="card hover-lift interactive">
+          <div class="card-header">
+            <div class="card-icon">📊</div>
+            <h3>Your Score</h3>
+          </div>
+          <div class="card-content">
+            <div class="stat-value" id="score">0</div>
+            <p class="stat-description">Total points earned from learning activities</p>
+          </div>
+          <div class="card-footer">
+            <div class="progress-indicator">
+              <div class="progress-bar" style="width: 75%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card hover-lift interactive">
+          <div class="card-header">
+            <div class="card-icon">❓</div>
+            <h3>Questions Asked</h3>
+          </div>
+          <div class="card-content">
+            <div class="stat-value" id="total-questions">0</div>
+            <p class="stat-description">Interactive learning sessions completed</p>
+          </div>
+          <div class="card-footer">
+            <div class="trend-indicator positive">
+              <span class="trend-arrow">↗</span>
+              <span class="trend-text">+12% this week</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card hover-lift interactive">
+          <div class="card-header">
+            <div class="card-icon">⚡</div>
+            <h3>Tokens Saved</h3>
+          </div>
+          <div class="card-content">
+            <div class="stat-value" id="tokens-saved">0</div>
+            <p class="stat-description">AI efficiency optimization achieved</p>
+          </div>
+          <div class="card-footer">
+            <div class="efficiency-badge">
+              <span class="badge-text">High Efficiency</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card hover-lift interactive">
+          <div class="card-header">
+            <div class="card-icon">🎯</div>
+            <h3>Avg Compression</h3>
+          </div>
+          <div class="card-content">
+            <div class="stat-value" id="avg-compression">0%</div>
+            <p class="stat-description">Context optimization performance</p>
+          </div>
+          <div class="card-footer">
+            <div class="compression-visual">
+              <div class="compression-bar">
+                <div class="compression-fill" id="compression-fill"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Tutor Section -->
+    <div class="content-section">
+      <div class="ai-tutor-container">
+        <div class="ai-tutor-header">
+          <div class="ai-avatar">
+            <div class="ai-avatar-inner">🤖</div>
+            <div class="ai-status-indicator"></div>
+          </div>
+          <div class="ai-tutor-info">
+            <h2>AI Learning Assistant</h2>
+            <p>Ask questions, get instant explanations, and accelerate your understanding</p>
+          </div>
+        </div>
+
+        <div class="ai-chat-interface">
+          <div class="chat-input-section">
+            <div class="input-container">
+              <textarea 
+                id="question-input" 
+                class="ai-input" 
+                placeholder="Ask me anything about your studies... (e.g., Explain photosynthesis, How does gravity work?)"
+                rows="3"
+              ></textarea>
+              <div class="input-actions">
+                <button class="ai-send-btn hover-lift" onclick="askQuestion()">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m22 2-7 20-4-9-9-4 20-7z"></path>
+                  </svg>
+                  <span>Ask AI</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Response Section -->
+          <div id="ai-response-section" class="ai-response-section hidden">
+            <div class="response-header">
+              <div class="response-avatar">🤖</div>
+              <div class="response-info">
+                <h4>AI Response</h4>
+                <div class="response-timestamp" id="response-timestamp"></div>
+              </div>
+            </div>
+            
+            <div class="response-content">
+              <div class="response-text" id="answer-text"></div>
+            </div>
+            
+            <!-- Performance Metrics -->
+            <div class="response-metrics">
+              <div class="metric-card">
+                <div class="metric-label">Original</div>
+                <div class="metric-value" id="original-tokens">0</div>
+                <div class="metric-unit">tokens</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Compressed</div>
+                <div class="metric-value" id="compressed-tokens">0</div>
+                <div class="metric-unit">tokens</div>
+              </div>
+              <div class="metric-card highlight">
+                <div class="metric-label">Saved</div>
+                <div class="metric-value" id="saved-tokens">0</div>
+                <div class="metric-unit">tokens</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Response Time</div>
+                <div class="metric-value" id="latency">0ms</div>
+                <div class="metric-unit">latency</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/enterprise-ui.js"></script>
+
+  <script>
+    const API_URL = 'http://localhost:8001/api';
+    const userId = localStorage.getItem('userId');
+    const username = localStorage.getItem('username');
+    const grade = localStorage.getItem('grade');
+
+    // Check authentication
+    if (!userId) {
+      window.location.href = 'login.html';
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeDashboard();
+    });
+
+    function initializeDashboard() {
+      // Set user info with animation
+      setUserInfo();
+      
+      // Load progress data
+      loadProgress();
+      
+      // Setup enhanced interactions
+      setupEnhancedInteractions();
+      
+      // Initialize page animations
+      initializePageAnimations();
+    }
+
+    function setUserInfo() {
+      document.getElementById('username').textContent = username;
+      document.getElementById('display-username').textContent = username;
+      document.getElementById('grade').textContent = grade;
+      document.getElementById('avatar').textContent = username.charAt(0).toUpperCase();
+    }
+
+    // Enhanced progress loading with animations
+    async function loadProgress() {
+      try {
+        const response = await fetch(`${API_URL}/progress/${userId}`);
+        const data = await response.json();
+
+        if (data.success) {
+          const progress = data.progress;
+          
+          // Animate numbers with staggered delays
+          setTimeout(() => window.enterpriseUI.animateNumber('score', progress.score), 200);
+          setTimeout(() => window.enterpriseUI.animateNumber('total-questions', progress.total_questions), 400);
+          setTimeout(() => window.enterpriseUI.animateNumber('tokens-saved', progress.total_tokens_saved), 600);
+          setTimeout(() => window.enterpriseUI.animateNumber('avg-compression', progress.avg_compression_rate, '%'), 800);
+          
+          // Update compression visual
+          setTimeout(() => {
+            const compressionFill = document.getElementById('compression-fill');
+            if (compressionFill) {
+              compressionFill.style.width = progress.avg_compression_rate + '%';
+            }
+          }, 1000);
+        }
+      } catch (error) {
+        console.error('Error loading progress:', error);
+        window.enterpriseUI.showNotification('Failed to load progress data', 'error');
+      }
+    }
+
+    // Enhanced ask question with better UX
+    async function askQuestion() {
+      const questionInput = document.getElementById('question-input');
+      const question = questionInput.value.trim();
+
+      if (!question) {
+        window.enterpriseUI.showNotification('Please enter a question', 'warning');
+        questionInput.focus();
+        return;
+      }
+
+      const sendBtn = document.querySelector('.ai-send-btn');
+      const responseSection = document.getElementById('ai-response-section');
+
+      // Enhanced loading state
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = `
+        <svg class="loading-spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12a9 9 0 11-6.219-8.56"/>
+        </svg>
+        <span>Processing...</span>
+      `;
+      
+      // Hide previous response
+      responseSection.classList.add('hidden');
+
+      try {
+        const response = await fetch(`${API_URL}/ask`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: userId,
+            question: question,
+            model: 'gemini-2.5-flash'
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Show response section with animation
+          responseSection.classList.remove('hidden');
+          
+          // Set timestamp
+          const timestamp = document.getElementById('response-timestamp');
+          if (timestamp) {
+            timestamp.textContent = new Date().toLocaleTimeString();
+          }
+          
+          // Typewriter effect for answer
+          setTimeout(() => {
+            window.enterpriseUI.typewriterEffect('answer-text', data.answer, 25);
+          }, 300);
+          
+          // Animate metrics with delays
+          const metrics = data.metrics;
+          setTimeout(() => {
+            window.enterpriseUI.animateNumber('original-tokens', metrics.original_tokens);
+            window.enterpriseUI.animateNumber('compressed-tokens', metrics.compressed_tokens);
+            window.enterpriseUI.animateNumber('saved-tokens', metrics.tokens_saved);
+            document.getElementById('latency').textContent = metrics.latency_ms.toFixed(0) + 'ms';
+          }, 800);
+
+          // Success notification
+          window.enterpriseUI.showNotification('Answer generated successfully!', 'success');
+
+          // Reload progress
+          setTimeout(() => {
+            loadProgress();
+          }, 1000);
+          
+          // Clear input
+          questionInput.value = '';
+          
+        } else {
+          window.enterpriseUI.showNotification('Error: ' + (data.detail || 'Failed to get answer'), 'error');
+        }
+      } catch (error) {
+        window.enterpriseUI.showNotification('Connection error. Please try again.', 'error');
+        console.error('Error:', error);
+      } finally {
+        // Reset button
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m22 2-7 20-4-9-9-4 20-7z"></path>
+          </svg>
+          <span>Ask AI</span>
+        `;
+      }
+    }
+
+    function setupEnhancedInteractions() {
+      // Enhanced keyboard shortcuts
+      const questionInput = document.getElementById('question-input');
+      if (questionInput) {
+        questionInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            askQuestion();
+          }
+        });
+
+        // Auto-resize textarea
+        questionInput.addEventListener('input', function() {
+          this.style.height = 'auto';
+          this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+        });
+      }
+
+      // Enhanced card interactions
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(card => {
+        card.addEventListener('mouseenter', () => {
+          card.style.transform = 'translateY(-8px) scale(1.02)';
+          card.style.boxShadow = 'var(--shadow-2xl)';
+        });
+        
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = '';
+          card.style.boxShadow = '';
+        });
+      });
+    }
+
+    function initializePageAnimations() {
+      // Stagger card animations
+      const cards = document.querySelectorAll('.card');
+      cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('animate-fade-in');
+      });
+
+      // Animate page sections
+      const sections = document.querySelectorAll('.content-section');
+      sections.forEach((section, index) => {
+        section.style.animationDelay = `${index * 0.2}s`;
+        section.classList.add('animate-slide-in-bottom');
+      });
+    }
+
+    function logout() {
+      // Enhanced logout with confirmation
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.enterpriseUI.showNotification('Logged out successfully', 'success');
+        
+        // Smooth transition to login
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1000);
+      }
+    }
+
+    // Listen for page initialization events
+    document.addEventListener('pageInitialized', (e) => {
+      if (e.detail.page.includes('dashboard')) {
+        initializeDashboard();
+      }
+    });
+
+    // Add required CSS for animations
+    const style = document.createElement('style');
+    style.textContent = `
+      .loading-spinner {
+        animation: spinSlow 1s linear infinite;
+      }
+      
+      .hidden {
+        display: none !important;
+      }
+      
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--space-xl);
+        margin-bottom: var(--space-2xl);
+      }
+      
+      @media (max-width: 768px) {
+        .cards {
+          grid-template-columns: 1fr;
+          gap: var(--space-lg);
+        }
+        
+        .user-info {
+          flex-direction: column;
+          text-align: center;
+          gap: var(--space-md);
+        }
+        
+        .page-header {
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          gap: var(--space-lg);
+        }
+        
+        .response-metrics {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .response-metrics {
+          grid-template-columns: 1fr;
+        }
+        
+        .ai-tutor-header {
+          flex-direction: column;
+          text-align: center;
+          gap: var(--space-md);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+
+</body>
+</html>

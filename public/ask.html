@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ask AI - AI Smart Tutor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <img src="assets/logo.png" alt="Logo" class="logo">
+            <span>AI Smart Tutor</span>
+        </div>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="ask.html" class="active">Ask AI</a>
+            <a href="quiz.html">Quiz</a>
+            <a href="leaderboard.html">Leaderboard</a>
+            <a href="progress.html">Progress</a>
+            <button onclick="logout()" class="logout-btn">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- AI Tutor Header -->
+        <div class="ai-tutor-container">
+            <div class="ai-tutor-header">
+                <div class="ai-avatar">
+                    <div class="ai-avatar-inner">🤖</div>
+                    <div class="ai-status-indicator"></div>
+                </div>
+                <div class="ai-tutor-info">
+                    <h2>🤖 AI Learning Assistant</h2>
+                    <p>Ask questions, get instant explanations, and accelerate your understanding</p>
+                </div>
+            </div>
+
+            <!-- Chat Interface -->
+            <div class="ai-chat-interface">
+                <!-- Chat Messages -->
+                <div id="chatbox" class="chat-messages">
+                    <div class="message ai-message">
+                        <div class="message-avatar">
+                            <div class="ai-avatar-small">🤖</div>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-text">
+                                Hi there! 👋 I'm your friendly AI tutor. I'm here to help you understand your textbook content in a simple and engaging way. 
+                                <br><br>
+                                <strong>What can I help you with today?</strong>
+                                <ul>
+                                    <li>📚 Explain concepts from your textbook</li>
+                                    <li>🔍 Break down complex topics</li>
+                                    <li>💡 Provide examples and analogies</li>
+                                    <li>📝 Help with homework questions</li>
+                                </ul>
+                                Just ask me anything about your studies!
+                            </div>
+                            <div class="message-time">Just now</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Section -->
+                <div class="chat-input-section">
+                    <div class="input-container">
+                        <textarea 
+                            id="question" 
+                            class="ai-input" 
+                            placeholder="Ask me anything about your textbook... (e.g., 'Explain file permissions in Unix')"
+                            rows="3"
+                        ></textarea>
+                        <div class="input-actions">
+                            <button onclick="askAI()" class="ai-send-btn" id="sendBtn">
+                                <span>Ask AI</span>
+                                <span>✨</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        let currentUser = null;
+        let messageCount = 0;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            currentUser = getCurrentUser();
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Auto-resize textarea
+            const textarea = document.getElementById('question');
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+            });
+            
+            // Enter to send (Shift+Enter for new line)
+            textarea.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    askAI();
+                }
+            });
+        });
+
+        async function askAI() {
+            const question = document.getElementById('question').value.trim();
+            const sendBtn = document.getElementById('sendBtn');
+            const chatbox = document.getElementById('chatbox');
+            
+            if (!question) {
+                alert('Please enter a question!');
+                return;
+            }
+            
+            // Add user message
+            addMessage(question, 'user');
+            
+            // Clear input and disable button
+            document.getElementById('question').value = '';
+            document.getElementById('question').style.height = 'auto';
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<span>Thinking...</span><div class="spinner-small"></div>';
+            
+            // Add loading message
+            const loadingId = addLoadingMessage();
+            
+            try {
+                const response = await fetch('/api/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUser.id,
+                        question: question,
+                        model: 'gpt-4o-mini'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Remove loading message
+                removeLoadingMessage(loadingId);
+                
+                if (data.success) {
+                    // Add AI response with metrics
+                    addAIResponse(data.answer, data.metrics);
+                } else {
+                    addMessage('Sorry, I encountered an error. Please try again.', 'ai', true);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                removeLoadingMessage(loadingId);
+                addMessage('Sorry, I encountered an error. Please try again.', 'ai', true);
+            } finally {
+                // Re-enable button
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<span>Ask AI</span><span>✨</span>';
+            }
+        }
+
+        function addMessage(text, type, isError = false) {
+            const chatbox = document.getElementById('chatbox');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message ${isError ? 'error' : ''}`;
+            
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            if (type === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="message-content user-content">
+                        <div class="message-text">${text}</div>
+                        <div class="message-time">${time}</div>
+                    </div>
+                    <div class="message-avatar">
+                        <div class="user-avatar">${currentUser.username.charAt(0).toUpperCase()}</div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="message-avatar">
+                        <div class="ai-avatar-small">🤖</div>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-text">${text}</div>
+                        <div class="message-time">${time}</div>
+                    </div>
+                `;
+            }
+            
+            chatbox.appendChild(messageDiv);
+            chatbox.scrollTop = chatbox.scrollHeight;
+            
+            // Add animation
+            messageDiv.style.opacity = '0';
+            messageDiv.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                messageDiv.style.transition = 'all 0.3s ease';
+                messageDiv.style.opacity = '1';
+                messageDiv.style.transform = 'translateY(0)';
+            }, 100);
+        }
+
+        function addAIResponse(answer, metrics) {
+            const chatbox = document.getElementById('chatbox');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ai-message';
+            
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">
+                    <div class="ai-avatar-small">🤖</div>
+                </div>
+                <div class="message-content">
+                    <div class="message-text">${formatAIResponse(answer)}</div>
+                    <div class="response-metrics">
+                        <div class="metric-item">
+                            <span class="metric-label">⚡Tokens Saved</span>
+                            <span class="metric-value">${metrics.tokens_saved.toLocaleString()}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">🎯Avg Compression</span>
+                            <span class="metric-value">${metrics.compression_rate}%</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">⏱️Response Time</span>
+                            <span class="metric-value">${metrics.latency_ms}ms</span>
+                        </div>
+                    </div>
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+            
+            chatbox.appendChild(messageDiv);
+            chatbox.scrollTop = chatbox.scrollHeight;
+            
+            // Add animation
+            messageDiv.style.opacity = '0';
+            messageDiv.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                messageDiv.style.transition = 'all 0.3s ease';
+                messageDiv.style.opacity = '1';
+                messageDiv.style.transform = 'translateY(0)';
+            }, 100);
+        }
+
+        function formatAIResponse(answer) {
+            // Make the response more readable with better formatting
+            return answer
+                .replace(/\n\n/g, '<br><br>')
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code>$1</code>');
+        }
+
+        function addLoadingMessage() {
+            const chatbox = document.getElementById('chatbox');
+            const loadingDiv = document.createElement('div');
+            const loadingId = 'loading-' + Date.now();
+            loadingDiv.id = loadingId;
+            loadingDiv.className = 'message ai-message loading';
+            
+            loadingDiv.innerHTML = `
+                <div class="message-avatar">
+                    <div class="ai-avatar-small">🤖</div>
+                </div>
+                <div class="message-content">
+                    <div class="message-text">
+                        <div class="typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <span>I'm reading your textbook and preparing a helpful answer...</span>
+                    </div>
+                </div>
+            `;
+            
+            chatbox.appendChild(loadingDiv);
+            chatbox.scrollTop = chatbox.scrollHeight;
+            
+            return loadingId;
+        }
+
+        function removeLoadingMessage(loadingId) {
+            const loadingDiv = document.getElementById(loadingId);
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+
+    <style>
+        /* Chat-specific styles */
+        .chat-messages {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: var(--space-lg);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--space-xl);
+            border: 1px solid var(--border-color);
+        }
+
+        .message {
+            display: flex;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            align-items: flex-start;
+        }
+
+        .user-message {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            flex-shrink: 0;
+        }
+
+        .ai-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--success-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .message-content {
+            flex: 1;
+            max-width: 70%;
+        }
+
+        .user-content {
+            text-align: right;
+        }
+
+        .message-text {
+            background: var(--bg-card);
+            padding: var(--space-lg);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .user-message .message-text {
+            background: var(--accent-gradient);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: var(--space-sm);
+        }
+
+        .response-metrics {
+            display: flex;
+            gap: var(--space-md);
+            margin-top: var(--space-md);
+            padding: var(--space-sm);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            font-size: 0.75rem;
+        }
+
+        .metric-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .metric-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .metric-value {
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        .ai-input {
+            width: 100%;
+            min-height: 60px;
+            max-height: 150px;
+            resize: none;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 1rem;
+            line-height: 1.5;
+            font-family: inherit;
+        }
+
+        .ai-input::placeholder {
+            color: var(--text-light);
+        }
+
+        .spinner-small {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spinSlow 1s linear infinite;
+        }
+
+        .typing-indicator {
+            display: inline-flex;
+            gap: 4px;
+            margin-right: var(--space-sm);
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            animation: typingDot 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typingDot {
+            0%, 80%, 100% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .response-metrics {
+                flex-direction: column;
+                gap: var(--space-sm);
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</body>
+</html>

@@ -139,6 +139,12 @@
 
   <!-- Particle JS with interactive lines -->
   <script>
+    // Check if user is logged in
+    const isLoggedIn = localStorage.getItem('loggedIn') === 'true' || sessionStorage.getItem('loggedIn') === 'true';
+    if (!isLoggedIn) {
+      window.location.href = 'login.html';
+    }
+
     const canvas = document.getElementById('particles');
     const ctx = canvas.getContext('2d');
     let particlesArray = [];

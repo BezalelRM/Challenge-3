@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard - AI Smart Tutor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Mobile Menu Toggle -->
+  <div class="mobile-menu-toggle">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </div>
+
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay"></div>
+
+  <!-- Enterprise Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <h2>
+      <span>📚</span>
+      <span>AI Smart Tutor</span>
+    </h2>
+    <ul>
+      <li><a href="dashboard.html"><span>Dashboard</span></a></li>
+      <li><a href="leaderboard.html" class="active"><span>Leaderboard</span></a></li>
+      <li><a href="upload.html"><span>Upload Textbook</span></a></li>
+      <li><a href="#" onclick="logout()" class="logout-btn"><span>Logout</span></a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main page-container">
+    <!-- Page Header -->
+    <div class="page-header content-section">
+      <div class="page-title-section">
+        <h1>🏆 Leaderboard</h1>
+        <p class="page-subtitle">Top performing students across all grades - updated in real-time</p>
+      </div>
+      <div class="leaderboard-controls">
+        <button class="refresh-btn hover-lift" onclick="refreshLeaderboard()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+          </svg>
+          <span>Refresh</span>
+        </button>
+        <div class="last-updated">
+          <span class="update-label">Last updated:</span>
+          <span class="update-time" id="last-updated">Just now</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="content-section">
+      <div class="stats-overview stagger-children">
+        <div class="stat-card hover-lift">
+          <div class="stat-icon">👑</div>
+          <div class="stat-content">
+            <h3>Top Scorer</h3>
+            <div class="stat-value" id="top-scorer">Loading...</div>
+            <div class="stat-change positive" id="top-score-change">+15 points today</div>
+          </div>
+        </div>
+        
+        <div class="stat-card hover-lift">
+          <div class="stat-icon">📊</div>
+          <div class="stat-content">
+            <h3>Total Students</h3>
+            <div class="stat-value" id="total-students">Loading...</div>
+            <div class="stat-change neutral" id="student-change">Active learners</div>
+          </div>
+        </div>
+        
+        <div class="stat-card hover-lift">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-content">
+            <h3>Average Score</h3>
+            <div class="stat-value" id="average-score">Loading...</div>
+            <div class="stat-change positive" id="avg-change">+8% this week</div>
+          </div>
+        </div>
+        
+        <div class="stat-card hover-lift">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-content">
+            <h3>Most Active</h3>
+            <div class="stat-value" id="most-active">Loading...</div>
+            <div class="stat-change positive" id="activity-change">25 questions today</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leaderboard Table -->
+    <div class="content-section">
+      <div class="leaderboard-container">
+        <div class="leaderboard-header">
+          <h2>Rankings</h2>
+          <div class="leaderboard-filters">
+            <select class="filter-select" id="grade-filter" onchange="filterLeaderboard()">
+              <option value="all">All Grades</option>
+              <option value="8">Class 8</option>
+              <option value="9">Class 9</option>
+              <option value="10">Class 10</option>
+              <option value="11">Class 11</option>
+              <option value="12">Class 12</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="leaderboard-table">
+          <div class="table-header">
+            <div class="header-cell rank-col">Rank</div>
+            <div class="header-cell student-col">Student</div>
+            <div class="header-cell grade-col">Grade</div>
+            <div class="header-cell score-col">Score</div>
+            <div class="header-cell trend-col">Trend</div>
+          </div>
+          
+          <div id="leaderboard-content" class="table-content">
+            <div class="loading-state">
+              <div class="loading-spinner-large"></div>
+              <div class="loading-text">Loading leaderboard...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Achievement Highlights -->
+    <div class="content-section">
+      <div class="achievements-section">
+        <h2>Recent Achievements</h2>
+        <div class="achievement-cards" id="achievement-cards">
+          <div class="achievement-card">
+            <div class="achievement-icon">🎉</div>
+            <div class="achievement-content">
+              <h4>New High Score!</h4>
+              <p>Someone just reached 1,500 points</p>
+            </div>
+          </div>
+          <div class="achievement-card">
+            <div class="achievement-icon">🔥</div>
+            <div class="achievement-content">
+              <h4>Learning Streak</h4>
+              <p>5 students have 7-day streaks</p>
+            </div>
+          </div>
+          <div class="achievement-card">
+            <div class="achievement-icon">⭐</div>
+            <div class="achievement-content">
+              <h4>Question Master</h4>
+              <p>100+ questions asked today</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/enterprise-ui.js"></script>
+
+  <script>
+    const API_URL = 'http://localhost:8001/api';
+    const currentUsername = localStorage.getItem('username');
+    let leaderboardData = [];
+    let refreshInterval;
+    let lastUpdateTime = new Date();
+
+    if (!localStorage.getItem('userId')) {
+      window.location.href = 'login.html';
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeLeaderboard();
+    });
+
+    function initializeLeaderboard() {
+      // Load initial data
+      loadLeaderboard();
+      
+      // Setup auto-refresh
+      setupAutoRefresh();
+      
+      // Initialize animations
+      initializePageAnimations();
+      
+      // Update timestamp
+      updateTimestamp();
+    }
+
+    // Enhanced leaderboard loading with animations
+    async function loadLeaderboard(showLoading = true) {
+      const content = document.getElementById('leaderboard-content');
+      
+      if (showLoading) {
+        content.innerHTML = `
+          <div class="loading-state">
+            <div class="loading-spinner-large"></div>
+            <div class="loading-text">Loading leaderboard...</div>
+          </div>
+        `;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/leaderboard`);
+        const data = await response.json();
+
+        if (data.success && data.leaderboard.length > 0) {
+          leaderboardData = data.leaderboard;
+          displayLeaderboard(data.leaderboard);
+          updateStatistics(data.leaderboard);
+          lastUpdateTime = new Date();
+          updateTimestamp();
+          
+          // Success notification for manual refresh
+          if (!showLoading) {
+            window.enterpriseUI.showNotification('Leaderboard updated successfully!', 'success');
+          }
+        } else {
+          showEmptyState();
+        }
+      } catch (error) {
+        console.error('Error loading leaderboard:', error);
+        showErrorState();
+        window.enterpriseUI.showNotification('Failed to load leaderboard', 'error');
+      }
+    }
+
+    function displayLeaderboard(leaderboard) {
+      const content = document.getElementById('leaderboard-content');
+      content.innerHTML = '';
+
+      leaderboard.forEach((user, index) => {
+        const rank = index + 1;
+        let rankDisplay = rank;
+        let rankClass = '';
+
+        if (rank === 1) {
+          rankDisplay = '🥇';
+          rankClass = 'gold';
+        } else if (rank === 2) {
+          rankDisplay = '🥈';
+          rankClass = 'silver';
+        } else if (rank === 3) {
+          rankDisplay = '🥉';
+          rankClass = 'bronze';
+        }
+
+        const isCurrentUser = user.username === currentUsername;
+        const trendIcon = getTrendIcon(user.score);
+
+        const row = document.createElement('div');
+        row.className = `leaderboard-row ${isCurrentUser ? 'current-user' : ''}`;
+        row.style.animationDelay = `${index * 0.1}s`;
+        row.classList.add('animate-slide-in-left');
+        
+        row.innerHTML = `
+          <div class="rank-display ${rankClass}">${rankDisplay}</div>
+          <div class="student-info">
+            <div class="student-avatar">${user.username.charAt(0).toUpperCase()}</div>
+            <div class="student-details">
+              <div class="student-name">
+                ${user.username}${isCurrentUser ? ' (You)' : ''}
+              </div>
+              <div class="student-subtitle">Student</div>
+            </div>
+          </div>
+          <div class="grade-col">
+            <div class="grade-badge">Class ${user.grade}</div>
+          </div>
+          <div class="score-display">${user.score.toLocaleString()}</div>
+          <div class="trend-col">
+            <div class="trend-display ${trendIcon.class}">
+              <span>${trendIcon.icon}</span>
+              <span>${trendIcon.text}</span>
+            </div>
+          </div>
+        `;
+
+        content.appendChild(row);
+      });
+    }
+
+    function getTrendIcon(score) {
+      // Simulate trend based on score (in real app, this would come from API)
+      const trends = [
+        { icon: '↗️', text: '+12', class: 'trend-up' },
+        { icon: '↘️', text: '-3', class: 'trend-down' },
+        { icon: '→', text: '0', class: 'trend-neutral' }
+      ];
+      
+      return trends[Math.floor(Math.random() * trends.length)];
+    }
+
+    function updateStatistics(leaderboard) {
+      if (leaderboard.length > 0) {
+        // Top scorer with animation
+        setTimeout(() => {
+          document.getElementById('top-scorer').textContent = leaderboard[0].username;
+        }, 200);
+        
+        // Total students
+        setTimeout(() => {
+          window.enterpriseUI.animateNumber('total-students', leaderboard.length);
+        }, 400);
+        
+        // Average score
+        setTimeout(() => {
+          const avgScore = Math.round(leaderboard.reduce((sum, user) => sum + user.score, 0) / leaderboard.length);
+          window.enterpriseUI.animateNumber('average-score', avgScore);
+        }, 600);
+        
+        // Most active (simulate)
+        setTimeout(() => {
+          const mostActive = leaderboard[Math.floor(Math.random() * Math.min(3, leaderboard.length))];
+          document.getElementById('most-active').textContent = mostActive.username;
+        }, 800);
+      }
+    }
+
+    function showEmptyState() {
+      const content = document.getElementById('leaderboard-content');
+      content.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📚</div>
+          <div class="empty-title">No Data Yet</div>
+          <div class="empty-message">Start learning to appear on the leaderboard!</div>
+        </div>
+      `;
+    }
+
+    function showErrorState() {
+      const content = document.getElementById('leaderboard-content');
+      content.innerHTML = `
+        <div class="error-state">
+          <div class="error-icon">⚠️</div>
+          <div class="error-title">Failed to Load</div>
+          <div class="error-message">Please try refreshing the page</div>
+        </div>
+      `;
+    }
+
+    // Manual refresh function
+    async function refreshLeaderboard() {
+      const refreshBtn = document.querySelector('.refresh-btn');
+      
+      // Add loading state
+      refreshBtn.classList.add('loading');
+      refreshBtn.disabled = true;
+      
+      // Load data without showing loading screen
+      await loadLeaderboard(false);
+      
+      // Remove loading state
+      setTimeout(() => {
+        refreshBtn.classList.remove('loading');
+        refreshBtn.disabled = false;
+      }, 500);
+    }
+
+    // Filter leaderboard by grade
+    function filterLeaderboard() {
+      const gradeFilter = document.getElementById('grade-filter').value;
+      
+      if (gradeFilter === 'all') {
+        displayLeaderboard(leaderboardData);
+      } else {
+        const filtered = leaderboardData.filter(user => user.grade.toString() === gradeFilter);
+        displayLeaderboard(filtered);
+      }
+    }
+
+    // Auto-refresh setup
+    function setupAutoRefresh() {
+      // Refresh every 30 seconds
+      refreshInterval = setInterval(() => {
+        loadLeaderboard(false);
+      }, 30000);
+      
+      // Refresh when page becomes visible
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          loadLeaderboard(false);
+        }
+      });
+      
+      // Refresh when window gains focus
+      window.addEventListener('focus', () => {
+        loadLeaderboard(false);
+      });
+    }
+
+    function updateTimestamp() {
+      const timestampEl = document.getElementById('last-updated');
+      if (timestampEl) {
+        const now = new Date();
+        const diff = Math.floor((now - lastUpdateTime) / 1000);
+        
+        if (diff < 60) {
+          timestampEl.textContent = 'Just now';
+        } else if (diff < 3600) {
+          timestampEl.textContent = `${Math.floor(diff / 60)}m ago`;
+        } else {
+          timestampEl.textContent = lastUpdateTime.toLocaleTimeString();
+        }
+      }
+    }
+
+    function initializePageAnimations() {
+      // Stagger stat card animations
+      const statCards = document.querySelectorAll('.stat-card');
+      statCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('animate-fade-in');
+      });
+
+      // Animate sections
+      const sections = document.querySelectorAll('.content-section');
+      sections.forEach((section, index) => {
+        section.style.animationDelay = `${index * 0.2}s`;
+        section.classList.add('animate-slide-in-bottom');
+      });
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        // Clear refresh interval
+        if (refreshInterval) {
+          clearInterval(refreshInterval);
+        }
+        
+        localStorage.clear();
+        sessionStorage.clear();
+        window.enterpriseUI.showNotification('Logged out successfully', 'success');
+        
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1000);
+      }
+    }
+
+    // Update timestamp every minute
+    setInterval(updateTimestamp, 60000);
+
+    // Listen for page initialization events
+    document.addEventListener('pageInitialized', (e) => {
+      if (e.detail.page.includes('leaderboard')) {
+        initializeLeaderboard();
+      }
+    });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    });
+
+    // Add required CSS for animations and responsive design
+    const style = document.createElement('style');
+    style.textContent = `
+      .empty-state, .error-state {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+        flex-direction: column;
+        gap: var(--space-lg);
+        text-align: center;
+        padding: var(--space-2xl);
+      }
+      
+      .empty-icon, .error-icon {
+        font-size: 4rem;
+        opacity: 0.6;
+      }
+      
+      .empty-title, .error-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--space-sm);
+      }
+      
+      .empty-message, .error-message {
+        color: var(--text-muted);
+        max-width: 400px;
+        line-height: 1.6;
+      }
+      
+      .loading-spinner-large {
+        width: 48px;
+        height: 48px;
+        border: 4px solid var(--border-color);
+        border-top: 4px solid var(--accent-primary);
+        border-radius: 50%;
+        animation: spinSlow 1s linear infinite;
+      }
+      
+      .loading-text {
+        color: var(--text-muted);
+        font-size: 1rem;
+        font-weight: 500;
+      }
+      
+      @media (max-width: 768px) {
+        .leaderboard-controls {
+          flex-direction: column;
+          gap: var(--space-md);
+        }
+        
+        .refresh-btn {
+          width: 100%;
+          justify-content: center;
+        }
+        
+        .last-updated {
+          align-items: center;
+          text-align: center;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+
+</body>
+</html>

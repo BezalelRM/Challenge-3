@@ -1,0 +1,50 @@
+[
+  {
+    "chapter": "General",
+    "content": "Name: BEZALEL RM Reg. No:URK24CS9034 23CS2005 \u2013 COMPUTER NETWORKS LAB EXPERIMENT NO: 1 BASIC NETWORKING TROUBLESHOOTING COMMANDS 1. Aim: To study, execute, and understand basic networking troubleshooting commands used to diagnose network connectivity, DNS issues and routing problems. 2. Tools Required: \u2022 Windows Command Prompt / Linux Terminal \u2022 Working network connection \u2022 Basic IP addressing knowledge 3. Commands Used, Description & Syntax: 1. ping Description: Tests connectivity to another device/website. Syntax: ping <IP address or domain> 2. ipconfig / ifconfig Description: Displays system IP address, subnet mask, gateway. Syntax (Windows): ipconfig Syntax (Linux/Mac): ifconfig 3. ipconfig /all Description: Shows complete network details including MAC address, DNS, DHCP. Syntax: ipconfig /all 4. tracert / traceroute Description: Displays hop-by-hop path to destination. Syntax (Windows): tracert <domain> Syntax (Linux/Mac):traceroute <domain> 5.",
+    "grade": "10",
+    "chunk_id": "General_0",
+    "start_pos": 0,
+    "end_pos": 963
+  },
+  {
+    "chapter": "General",
+    "content": "MAC address, DNS, DHCP. Syntax: ipconfig /all 4. tracert / traceroute Description: Displays hop-by-hop path to destination. Syntax (Windows): tracert <domain> Syntax (Linux/Mac):traceroute <domain> 5. nslookup Description: Resolves domain name to IP address (DNS test). Syntax: nslookup <domain> Name: BEZALEL RM Reg. No:URK24CS9034 6. netstat Description: Shows active connections, ports, and protocol statistics. Syntax: netstat -a 7. arp -a Description: Displays ARP table mapping IP addresses to MAC addresses. Syntax:arp -a 8. route print Description: Shows routing table information. Syntax: route print 9. hostname Description: Displays system name. Syntax:hostname 10. pathping Description: Displays the path of the ping packet Syntax: pathping google.com 4. Procedure: 1. Open Command Prompt (Windows) or Terminal (Linux/Mac). 2. Type the commands one by one as listed above. 3. Observe the output displayed after running each command. 4.",
+    "grade": "10",
+    "chunk_id": "General_1",
+    "start_pos": 763,
+    "end_pos": 1710
+  },
+  {
+    "chapter": "General",
+    "content": "hping google.com 4. Procedure: 1. Open Command Prompt (Windows) or Terminal (Linux/Mac). 2. Type the commands one by one as listed above. 3. Observe the output displayed after running each command. 4. Note down important values such as IP address, gateway, DNS server, hop count, open ports, and hostname. 5. Record the output in the observation table. 6. Interpret the results to understand connectivity, routing, and DNS behavior. 5. Observation Table 1. Command: ping Command Executed: ping google.com Question Answer 1. What IP address was resolved? 2404:6800:4007:838::200e 2. What is the average ping time (ms)? 97ms 2. Command: ipconfig / ifconfig Command Executed: ipconfig Name: BEZALEL RM Reg. No:URK24CS9034 Question Answer 1. Write your IPv4 address. 10.235.67.130 2. Write your Subnet Mask. 255.255.255.0 3. Command: ipconfig /all Command Executed: ipconfig /all Question Answer 1. What is your MAC (Physical) address? 00-45-E2-D7-C5-BF 2. What is your DNS server? 10.235.67.83 4.",
+    "grade": "10",
+    "chunk_id": "General_2",
+    "start_pos": 1510,
+    "end_pos": 2503
+  },
+  {
+    "chapter": "General",
+    "content": "bnet Mask. 255.255.255.0 3. Command: ipconfig /all Command Executed: ipconfig /all Question Answer 1. What is your MAC (Physical) address? 00-45-E2-D7-C5-BF 2. What is your DNS server? 10.235.67.83 4. Command: tracert / traceroute Command Executed: tracert google.com Question Answer 1. How many hops are shown? 10 2. What is the IP of the first hop? 2401:4900:927b:5055::a1 5. Command: nslookup Command Executed: nslookup Question Answer 1. What DNS server responded? 10.235.67.83 2. What IP does the domain resolve to? 142.251.223.14 6. Command: netstat Command Executed: netstat Question Answer 1. How many active TCP connections are visible? 24 2. Write any one open port number you see. 49756 7. Command: arp -a Command Executed: arp -a Name: BEZALEL RM Reg. No:URK24CS9034 Question Answer 1. What is the MAC address of your default gateway? 3a-5f-7b-4a-03-61 2. How many ARP entries are listed? 19 8. Command: route print Command Executed: route print Question Answer 1.",
+    "grade": "10",
+    "chunk_id": "General_3",
+    "start_pos": 2303,
+    "end_pos": 3279
+  },
+  {
+    "chapter": "General",
+    "content": "34 Question Answer 1. What is the MAC address of your default gateway? 3a-5f-7b-4a-03-61 2. How many ARP entries are listed? 19 8. Command: route print Command Executed: route print Question Answer 1. What is the default gateway in the routing table? 10.235.67.83 2. What is the network destination for 0.0.0.0? 0.0.0.0 9. Command: hostname Command Executed: hostname/whoami Question Answer 1. What is your system hostname? GodX 2. Which user is logged in? (Use whoami) bez\\welcome 10. Command: pathping Command Executed: pathping google.com Question Answer 1. Did the port 80 connection succeed? (Yes/No) Yes 2. What IP address was tested? 2404:6800:4007:810::200e 6. Result: The basic troubleshooting commands were executed successfully. The student understood how to: \u2022 Test connectivity using ping \u2022 Check IP and gateway using ipconfig \u2022 Verify DNS using nslookup \u2022 Trace network route using tracert \u2022 Analyze ports using netstat \u2022 Inspect routing and ARP tables \u2022 Test Pathping route.",
+    "grade": "10",
+    "chunk_id": "General_4",
+    "start_pos": 3079,
+    "end_pos": 4068
+  },
+  {
+    "chapter": "General",
+    "content": "y using ping \u2022 Check IP and gateway using ipconfig \u2022 Verify DNS using nslookup \u2022 Trace network route using tracert \u2022 Analyze ports using netstat \u2022 Inspect routing and ARP tables \u2022 Test Pathping route. Thus, the experiment on networking diagnostics was completed effectively.",
+    "grade": "10",
+    "chunk_id": "General_5",
+    "start_pos": 3868,
+    "end_pos": 4868
+  }
+]

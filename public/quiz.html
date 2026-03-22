@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz - AI Smart Tutor</title>
+    <link rel="stylesheet" href="css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <img src="assets/logo.png" alt="Logo" class="logo">
+            <span>AI Smart Tutor</span>
+        </div>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="ask.html">Ask AI</a>
+            <a href="quiz.html" class="active">Quiz</a>
+            <a href="leaderboard.html">Leaderboard</a>
+            <a href="progress.html">Progress</a>
+            <button onclick="logout()" class="logout-btn">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="quiz-container">
+            <div id="quiz-start" class="quiz-section">
+                <h1>📚 Practice Quiz</h1>
+                <p>Test your knowledge with questions generated from your textbook content!</p>
+                
+                <div class="quiz-options">
+                    <label for="numQuestions">Number of Questions:</label>
+                    <select id="numQuestions">
+                        <option value="5">5 Questions</option>
+                        <option value="10" selected>10 Questions</option>
+                        <option value="15">15 Questions</option>
+                        <option value="20">20 Questions</option>
+                    </select>
+                </div>
+                
+                <button onclick="generateQuiz()" class="btn btn-primary" id="generateBtn">
+                    🎯 Generate Quiz
+                </button>
+                
+                <div id="loading" class="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Generating your personalized quiz...</p>
+                </div>
+            </div>
+
+            <div id="quiz-content" class="quiz-section" style="display: none;">
+                <div class="quiz-header">
+                    <h2 id="quiz-title">Quiz</h2>
+                    <div class="quiz-progress">
+                        <span id="question-counter">Question 1 of 10</span>
+                        <div class="progress-bar">
+                            <div id="progress-fill" class="progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-container">
+                    <div id="question-text" class="question-text"></div>
+                    <div id="question-options" class="question-options"></div>
+                </div>
+
+                <div class="quiz-controls">
+                    <button onclick="previousQuestion()" id="prevBtn" class="btn btn-secondary" disabled>
+                        ← Previous
+                    </button>
+                    <button onclick="nextQuestion()" id="nextBtn" class="btn btn-primary">
+                        Next →
+                    </button>
+                    <button onclick="submitQuiz()" id="submitBtn" class="btn btn-success" style="display: none;">
+                        🎯 Submit Quiz
+                    </button>
+                </div>
+            </div>
+
+            <div id="quiz-results" class="quiz-section" style="display: none;">
+                <div class="results-container">
+                    <h2>🎉 Quiz Complete!</h2>
+                    <div class="score-display">
+                        <div class="score-circle">
+                            <span id="score-percentage">0%</span>
+                        </div>
+                        <div class="score-details">
+                            <p><strong id="correct-answers">0</strong> out of <strong id="total-questions">0</strong> correct</p>
+                            <p class="grade">Grade: <span id="letter-grade">F</span></p>
+                            <p class="points">Points Earned: <span id="points-earned">0</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="quiz-actions">
+                        <button onclick="showReview()" class="btn btn-secondary">📋 Review Answers</button>
+                        <button onclick="startNewQuiz()" class="btn btn-primary">🔄 New Quiz</button>
+                        <button onclick="goToLeaderboard()" class="btn btn-success">🏆 View Leaderboard</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="quiz-review" class="quiz-section" style="display: none;">
+                <h2>📋 Answer Review</h2>
+                <div id="review-content"></div>
+                <button onclick="backToResults()" class="btn btn-secondary">← Back to Results</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        let currentUser = null;
+        let currentQuiz = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            currentUser = getCurrentUser();
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+        });
+
+        async function generateQuiz() {
+            const numQuestions = document.getElementById('numQuestions').value;
+            const generateBtn = document.getElementById('generateBtn');
+            const loading = document.getElementById('loading');
+            
+            generateBtn.disabled = true;
+            loading.style.display = 'block';
+            
+            try {
+                const response = await fetch('/api/generate-quiz', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUser.id,
+                        num_questions: parseInt(numQuestions)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentQuiz = data;
+                    userAnswers = {};
+                    currentQuestionIndex = 0;
+                    showQuizContent();
+                    displayQuestion();
+                } else {
+                    alert('Error generating quiz: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error generating quiz. Please try again.');
+            } finally {
+                generateBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        function showQuizContent() {
+            document.getElementById('quiz-start').style.display = 'none';
+            document.getElementById('quiz-content').style.display = 'block';
+            document.getElementById('quiz-results').style.display = 'none';
+            document.getElementById('quiz-review').style.display = 'none';
+        }
+
+        function displayQuestion() {
+            if (!currentQuiz || !currentQuiz.questions) return;
+            
+            const question = currentQuiz.questions[currentQuestionIndex];
+            const totalQuestions = currentQuiz.questions.length;
+            
+            // Update progress
+            document.getElementById('question-counter').textContent = 
+                `Question ${currentQuestionIndex + 1} of ${totalQuestions}`;
+            document.getElementById('progress-fill').style.width = 
+                `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`;
+            
+            // Display question
+            document.getElementById('question-text').innerHTML = 
+                `<h3>${question.question}</h3>`;
+            
+            // Display options based on question type
+            const optionsContainer = document.getElementById('question-options');
+            optionsContainer.innerHTML = '';
+            
+            if (question.type === 'multiple_choice') {
+                question.options.forEach((option, index) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    optionDiv.innerHTML = `
+                        <input type="radio" name="answer" value="${option}" id="option${index}"
+                               ${userAnswers[question.id] === option ? 'checked' : ''}>
+                        <label for="option${index}">${option}</label>
+                    `;
+                    optionsContainer.appendChild(optionDiv);
+                });
+            } else if (question.type === 'true_false') {
+                ['True', 'False'].forEach((option, index) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    optionDiv.innerHTML = `
+                        <input type="radio" name="answer" value="${option}" id="option${index}"
+                               ${userAnswers[question.id] === option ? 'checked' : ''}>
+                        <label for="option${index}">${option}</label>
+                    `;
+                    optionsContainer.appendChild(optionDiv);
+                });
+            } else if (question.type === 'fill_blank' || question.type === 'short_answer') {
+                const inputDiv = document.createElement('div');
+                inputDiv.className = 'text-input';
+                inputDiv.innerHTML = `
+                    <textarea name="answer" placeholder="Enter your answer..." 
+                              rows="3">${userAnswers[question.id] || ''}</textarea>
+                `;
+                optionsContainer.appendChild(inputDiv);
+            }
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+            document.getElementById('nextBtn').style.display = 
+                currentQuestionIndex === totalQuestions - 1 ? 'none' : 'inline-block';
+            document.getElementById('submitBtn').style.display = 
+                currentQuestionIndex === totalQuestions - 1 ? 'inline-block' : 'none';
+        }
+
+        function saveCurrentAnswer() {
+            if (!currentQuiz || !currentQuiz.questions) return;
+            
+            const question = currentQuiz.questions[currentQuestionIndex];
+            const answerInput = document.querySelector('input[name="answer"]:checked') || 
+                              document.querySelector('textarea[name="answer"]');
+            
+            if (answerInput) {
+                userAnswers[question.id] = answerInput.value;
+            }
+        }
+
+        function nextQuestion() {
+            saveCurrentAnswer();
+            if (currentQuestionIndex < currentQuiz.questions.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function previousQuestion() {
+            saveCurrentAnswer();
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        async function submitQuiz() {
+            saveCurrentAnswer();
+            
+            if (Object.keys(userAnswers).length < currentQuiz.questions.length) {
+                if (!confirm('You haven\'t answered all questions. Submit anyway?')) {
+                    return;
+                }
+            }
+            
+            try {
+                const response = await fetch('/api/submit-quiz', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUser.id,
+                        quiz_id: currentQuiz.quiz_id,
+                        answers: userAnswers
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResults(data.score, data.points_earned);
+                } else {
+                    alert('Error submitting quiz: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error submitting quiz. Please try again.');
+            }
+        }
+
+        function showResults(score, pointsEarned) {
+            document.getElementById('quiz-content').style.display = 'none';
+            document.getElementById('quiz-results').style.display = 'block';
+            
+            document.getElementById('score-percentage').textContent = `${Math.round(score.percentage)}%`;
+            document.getElementById('correct-answers').textContent = score.correct;
+            document.getElementById('total-questions').textContent = score.total;
+            document.getElementById('letter-grade').textContent = score.grade;
+            document.getElementById('points-earned').textContent = pointsEarned;
+            
+            // Update score circle color based on grade
+            const scoreCircle = document.querySelector('.score-circle');
+            if (score.percentage >= 90) scoreCircle.className = 'score-circle excellent';
+            else if (score.percentage >= 80) scoreCircle.className = 'score-circle good';
+            else if (score.percentage >= 70) scoreCircle.className = 'score-circle average';
+            else scoreCircle.className = 'score-circle poor';
+        }
+
+        function showReview() {
+            document.getElementById('quiz-results').style.display = 'none';
+            document.getElementById('quiz-review').style.display = 'block';
+            
+            const reviewContent = document.getElementById('review-content');
+            reviewContent.innerHTML = '';
+            
+            currentQuiz.questions.forEach((question, index) => {
+                const userAnswer = userAnswers[question.id] || 'No answer';
+                const isCorrect = userAnswer === question.correct_answer;
+                
+                const reviewItem = document.createElement('div');
+                reviewItem.className = `review-item ${isCorrect ? 'correct' : 'incorrect'}`;
+                reviewItem.innerHTML = `
+                    <h4>Question ${index + 1}</h4>
+                    <p class="question">${question.question}</p>
+                    <p class="user-answer">Your answer: <span>${userAnswer}</span></p>
+                    <p class="correct-answer">Correct answer: <span>${question.correct_answer}</span></p>
+                    ${question.explanation ? `<p class="explanation">${question.explanation}</p>` : ''}
+                `;
+                reviewContent.appendChild(reviewItem);
+            });
+        }
+
+        function backToResults() {
+            document.getElementById('quiz-review').style.display = 'none';
+            document.getElementById('quiz-results').style.display = 'block';
+        }
+
+        function startNewQuiz() {
+            document.getElementById('quiz-results').style.display = 'none';
+            document.getElementById('quiz-start').style.display = 'block';
+            currentQuiz = null;
+            userAnswers = {};
+            currentQuestionIndex = 0;
+        }
+
+        function goToLeaderboard() {
+            window.location.href = 'leaderboard.html';
+        }
+    </script>
+</body>
+</html>
